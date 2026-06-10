@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Kalshi Metals</title>
+<style>
+:root{--bg:#0d1117;--card:#161b22;--line:#30363d;--fg:#e6edf3;--dim:#8b949e;
+--green:#3fb950;--red:#f85149;--amber:#d29922;--blue:#58a6ff;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);
+font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 64px}
+.lock{min-height:100vh;display:flex;align-items:center;justify-content:center}
+.lockcard{background:var(--card);border:1px solid var(--line);border-radius:12px;
+padding:36px;width:min(380px,90vw);text-align:center}
+.lockcard h1{margin:0 0 6px;font-size:20px}.lockcard p{color:var(--dim);margin:0 0 20px;font-size:13px}
+.lockcard input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--line);
+background:var(--bg);color:var(--fg);font-size:15px;margin-bottom:12px}
+.lockcard button{width:100%;padding:10px;border-radius:8px;border:0;background:#238636;
+color:#fff;font-size:15px;font-weight:600;cursor:pointer}
+.lockcard button:disabled{opacity:.6}.err{color:var(--red);font-size:13px;min-height:20px;margin-top:10px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;margin-bottom:8px}
+header h1{margin:0;font-size:22px}.gen{color:var(--dim);font-size:13px}
+.btn{display:inline-block;background:#21262d;border:1px solid var(--line);border-radius:8px;
+padding:6px 14px;font-size:13px;color:var(--fg)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin:16px 0}
+.mhead{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:6px}
+.mhead h2{margin:0;font-size:18px}
+.badge{font-size:12px;padding:2px 10px;border-radius:999px;border:1px solid}
+.badge.live{color:var(--green);border-color:var(--green)}
+.badge.closed{color:var(--red);border-color:var(--red)}
+.meta{color:var(--dim);font-size:13px;margin:2px 0 10px}
+.meta b{color:var(--fg);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
+th{color:var(--dim);text-align:left;font-weight:500;border-bottom:1px solid var(--line);padding:5px 8px}
+td{padding:5px 8px;border-bottom:1px solid #21262d;font-family:var(--mono)}
+td:first-child{font-family:inherit}
+.num{text-align:right}th.num{text-align:right}
+.pos{color:var(--green)}.neg{color:var(--red)}
+.tag{font-size:11px;padding:1px 8px;border-radius:999px;background:#21262d;color:var(--dim)}
+.tag.structural{color:var(--amber)}.tag.signal-driven{color:var(--blue)}
+h3{font-size:14px;margin:18px 0 4px}.note{color:var(--dim);font-size:13px}
+details{margin:8px 0}summary{cursor:pointer;color:var(--dim);font-size:13px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
+.kpi{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.kpi .v{font-family:var(--mono);font-size:18px}.kpi .l{color:var(--dim);font-size:11px}
+.verdict{font-size:13px;padding:8px 12px;border-radius:8px;border:1px solid var(--line);margin-top:8px}
+footer{color:var(--dim);font-size:12px;margin-top:28px;border-top:1px solid var(--line);padding-top:14px}
+</style></head><body>
+<div id="lock" class="lock"><div class="lockcard">
+  <h1>🔒 Kalshi Metals</h1>
+  <p>This dashboard is encrypted. Enter the password to decrypt it in your browser.</p>
+  <input id="pw" type="password" placeholder="Password" autofocus
+         onkeydown="if(event.key==='Enter')unlock()">
+  <button id="go" onclick="unlock()">Unlock</button>
+  <div id="err" class="err"></div>
+</div></div>
+<div id="app" class="wrap" style="display:none"></div>
+<script>
+const SALT="zDn/Ta5xAYoHQSxsQaWkeA==",NONCE="Z/LS+BCPE4ipUn1F",CT="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",ITERS=310000;
+const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function decrypt(pw){
+  const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
+  const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64(SALT),iterations:ITERS,hash:'SHA-256'},
+    km,{name:'AES-GCM',length:256},false,['decrypt']);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(NONCE)},key,b64(CT));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+async function unlock(){
+  const pw=document.getElementById('pw').value,go=document.getElementById('go');
+  go.disabled=true;document.getElementById('err').textContent='';
+  try{
+    const data=await decrypt(pw);
+    sessionStorage.setItem('km_pw',pw);
+    render(data);
+  }catch(e){
+    document.getElementById('err').textContent='Wrong password.';
+    go.disabled=false;
+  }
+}
+const esc=s=>String(s??'–').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const f=(x,d=2)=>(x==null||isNaN(x))?'–':Number(x).toFixed(d);
+const sgn=x=>x==null?'–':`<span class="${x>=0?'pos':'neg'}">${x>=0?'+':''}${Number(x).toFixed(2)}</span>`;
+function tbl(heads,rows){return `<table><tr>${heads.map(h=>`<th class="${h.n?'num':''}">${h.t}</th>`).join('')}</tr>${rows.join('')}</table>`}
+function metalCard(m){
+  const badge=m.live?'<span class="badge live">● LIVE</span>':'<span class="badge closed">● market closed</span>';
+  let h=`<div class="card"><div class="mhead"><h2>${esc(m.name)}</h2><span class="tag">${esc(m.series)}</span>${badge}</div>`;
+  if(m.event){
+    h+=`<div class="meta"><b>${esc(m.event)}</b> · settles ${esc(m.close_time)}<br>
+    anchor <b>$${f(m.anchor)}/${esc(m.unit)}</b> <span>(${esc(m.anchor_source)})</span> ·
+    σ <b>${f((m.sigma||0)*100)}%/day</b> · drift <b>${((m.drift||0)*100).toFixed(2)}%</b> ·
+    Metalminer <b>${esc(m.signal)}</b>${m.live?'':' · <span class="neg">edges below are phantoms (stale anchor)</span>'}</div>`;
+  } else h+=`<div class="note">No prediction this run.</div>`;
+  for(const w of ['open','close']){
+    const win=m.windows&&m.windows[w];if(!win)continue;
+    h+=`<h3>${w==='open'?'Open':'Close'}-run paper trades${win.capped?' <span class="tag">stake-capped</span>':''}</h3>`;
+    if(!win.trades.length)h+=`<div class="note">No strikes cleared min-edge after fees — correct outcome vs an efficient ladder.</div>`;
+    else h+=tbl([{t:'strike',n:1},{t:'side'},{t:'@',n:1},{t:'win-p',n:1},{t:'edge',n:1},{t:'qty',n:1},{t:'stake',n:1},{t:'EV',n:1}],
+      win.trades.map(t=>`<tr><td class="num">${f(t.strike)}</td><td>${esc(t.side).toUpperCase()}</td><td class="num">${f(t.cost)}</td><td class="num">${f(t.win_p)}</td><td class="num">${sgn(t.edge)}</td><td class="num">${t.n}</td><td class="num">$${f(t.stake)}</td><td class="num">${sgn(t.ev)}</td></tr>`));
+    if(win.recs&&win.recs.length){
+      const r=win.recs[0];
+      h+=`<div class="note"><b style="color:var(--fg)">Top alpha:</b> ${esc(r.action)} ${f(r.strike)} @ ${f(r.price)}
+      (edge ${r.edge>=0?'+':''}${f(r.edge)}) <span class="tag ${esc(r.source)}">${esc(r.source)}</span></div>`;
+    }
+    if(win.control)h+=`<div class="note">Control (favorite ≥ ${Math.round((win.control.threshold||0.55)*100)}%): ${win.control.n} bets, stake $${f(win.control.stake)}</div>`;
+  }
+  if(m.ladder&&m.ladder.length){
+    h+=`<details><summary>Ladder near the anchor (±1.5σ)</summary>`+
+    tbl([{t:'strike',n:1},{t:'market mid',n:1},{t:'model p',n:1},{t:'edge',n:1}],
+      m.ladder.map(r=>`<tr><td class="num">${f(r.strike)}</td><td class="num">${f(r.mid)}</td><td class="num">${f(r.p)}</td><td class="num">${sgn(r.edge)}</td></tr>`))+`</details>`;
+  }
+  const s=m.scorecard||{};
+  h+=`<h3>Performance — ${s.n_events||0} settled event(s)</h3>`;
+  if(!s.n_events)h+=`<div class="note">Nothing settled yet.</div>`;
+  else{
+    h+=`<div class="kpis">
+    <div class="kpi"><div class="v">${sgn(s.model_pnl)}</div><div class="l">MODEL PNL (${s.model_trades||0} trades, ${s.model_wins||0} won)</div></div>
+    <div class="kpi"><div class="v">${sgn(s.control_pnl)}</div><div class="l">CONTROL PNL (${s.control_trades||0} bets, ${s.control_wins||0} won)</div></div>
+    <div class="kpi"><div class="v">${f(s.brier_overlay,4)}</div><div class="l">MODEL BRIER (overlay)</div></div>
+    <div class="kpi"><div class="v">${f(s.brier_market,4)}</div><div class="l">MARKET BRIER</div></div></div>`;
+    const ahead=(s.model_pnl||0)>(s.control_pnl||0);
+    h+=`<div class="verdict">${ahead?'✅ model ahead of control':'⚠️ control ahead — model not yet earning its complexity'} ·
+    n=${s.n_events} ${s.n_events<30?'(provisional, need ≥30)':''}</div>`;
+    if(m.recent&&m.recent.length){
+      h+=`<details><summary>Recent settled events</summary>`+
+      tbl([{t:'event'},{t:'settle',n:1},{t:'Brier ovl',n:1},{t:'Brier mkt',n:1},{t:'model PnL',n:1},{t:'control PnL',n:1}],
+        m.recent.map(e=>`<tr><td>${esc(e.event)}${e.orphan?' <span class="tag">orphan</span>':''}</td><td class="num">${f(e.settle)}</td><td class="num">${f(e.brier_overlay,4)}</td><td class="num">${f(e.brier_market,4)}</td><td class="num">${sgn(e.pnl)}</td><td class="num">${sgn(e.control_pnl)}</td></tr>`));
+      h+=`</details>`;
+    }
+  }
+  return h+`</div>`;
+}
+function render(data){
+  document.getElementById('lock').style.display='none';
+  const app=document.getElementById('app');app.style.display='block';
+  let h=`<header><h1>Kalshi Metals</h1><span class="gen">generated ${esc(data.generated_at)}</span>
+  <a class="btn" href="${esc(data.rerun_url)}" target="_blank">▶ Re-run now</a></header>
+  <div class="note">Paper trading only — nothing here places real orders. The re-run button opens GitHub Actions
+  (needs your GitHub login); press <i>Run workflow</i>, then reload this page ~5 min later.</div>`;
+  for(const m of data.metals)h+=metalCard(m);
+  h+=`<footer><b>Known flaws (honest footnote):</b> ${esc(data.flaws)}<br><br>
+  Site refreshes each trading day ~9:35 ET. Data is end-to-end encrypted with your password — this page is
+  unreadable without it.</footer>`;
+  app.innerHTML=h;
+}
+(async()=>{const pw=sessionStorage.getItem('km_pw');
+ if(pw){try{render(await decrypt(pw))}catch(e){sessionStorage.removeItem('km_pw')}}})();
+</script></body></html>
